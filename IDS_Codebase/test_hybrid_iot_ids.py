@@ -197,7 +197,34 @@ class HybridIoTIDSTest(unittest.TestCase):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
+    def test_prometheus_metrics_exporter(self) -> None:
+
+        from metrics_exporter import PrometheusMetricsExporter
+        exporter = PrometheusMetricsExporter()
+        exporter.record_detection("Injection Attack", "rule_engine")
+        metrics = exporter.generate_prometheus_metrics()
+        self.assertIn('iot_ids_windows_total 1', metrics)
+        self.assertIn('iot_ids_attacks_total{type="injection_attack"} 1', metrics)
+
+    def test_alert_webhook_engine(self) -> None:
+        from alert_webhooks import AlertWebhookEngine
+        engine = AlertWebhookEngine()
+        payload = engine.trigger_alert("Replay Attack", "Device_01", "HIGH", "2026-01-01T00:00:00")
+        self.assertEqual(payload["attack_type"], "Replay Attack")
+        self.assertEqual(len(engine.alert_history), 1)
+
+    def test_zero_trust_quarantine_engine(self) -> None:
+        from detection.zero_trust_quarantine import ZeroTrustQuarantineEngine
+        quarantine = ZeroTrustQuarantineEngine()
+        self.assertFalse(quarantine.is_quarantined("Device_01"))
+        record = quarantine.quarantine_sensor("Device_01", "Injection Attack", "2026-01-01T00:00:00")
+        self.assertTrue(quarantine.is_quarantined("Device_01"))
+        self.assertIn("DROP", record["iptables_rule"])
+        self.assertTrue(quarantine.release_sensor("Device_01"))
+        self.assertFalse(quarantine.is_quarantined("Device_01"))
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
