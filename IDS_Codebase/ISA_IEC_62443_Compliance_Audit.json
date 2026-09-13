@@ -1,0 +1,28 @@
+{
+    "title": "ISA/IEC 62443-4-2 & BACnet/SC Cybersecurity Compliance Audit Report",
+    "generated_at": "2026-09-13T15:57:42.407718Z",
+    "author": "Aman Rajpoot (@Amanxplore)",
+    "organization": "Smart Building Security Operations Center (SOC)",
+    "standards": [
+        "ISA/IEC 62443-4-2: Industrial Communication Networks - Security for Industrial Automation and Control Systems",
+        "ASHRAE 135 / BACnet Secure Connect (BACnet/SC)",
+        "NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security"
+    ],
+    "controls_assessment": {
+        "CR_1.1_Human_User_Identification": "PASS - Multi-factor Streamlit RBAC authentication",
+        "CR_2.1_Transaction_Integrity": "PASS - SHA-256 HMAC payload signatures in hardware firmware",
+        "CR_3.1_Communication_Integrity": "PASS - BACnet/SC application-layer inspection & MQTT TLS encryption",
+        "CR_3.4_Software_And_Information_Integrity": "PASS - 3-Tier Hybrid Machine Learning Anomaly Detection",
+        "CR_6.1_Audit_Log_Accessibility": "PASS - Atomic audit log engine writing to audit_log.csv"
+    },
+    "system_status": {
+        "overall_model_accuracy": "78.78%",
+        "decision_tiers": [
+            "LSTM Autoencoder",
+            "Multi-Model Voting Ensemble",
+            "Thermodynamic Rules"
+        ],
+        "replay_detector": "Locality-Sensitive Hashing (LSH) MinHash"
+    },
+    "audit_signature_sha256": "1aafdfede8f1fb2e180601574b2aad954d5736d2b7fb6f48b38e74283e88fc0d"
+}
