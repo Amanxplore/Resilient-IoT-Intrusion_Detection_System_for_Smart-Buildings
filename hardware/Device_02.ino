@@ -109,14 +109,20 @@ void loop() {
   char timeString[25];
   strftime(timeString, sizeof(timeString), "%d-%m-%Y %H:%M:%S", timeInfo);
   
+  // Sequence counter for replay protection
+  static uint32_t seq_num = 0;
+  seq_num++;
+
   // Create JSON payload
   String payload = "{";
   payload += "\"device\":\"" + device_id + "\",";
+  payload += "\"seq\":" + String(seq_num) + ",";
   payload += "\"time\":\"" + String(timeString) + "\",";
   payload += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
   payload += "\"temp\":" + String(t, 1) + ",";
   payload += "\"humidity\":" + String(h, 1);
   payload += "}";
+
   
   // Publish to topic
   String topic = "sensor/" + device_id;
