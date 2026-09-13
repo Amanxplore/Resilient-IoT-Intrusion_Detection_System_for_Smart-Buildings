@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import logging
 from typing import Set, Dict, List
+
+logger = logging.getLogger("ZeroTrustQuarantineEngine")
 
 class ZeroTrustQuarantineEngine:
     """
@@ -21,7 +24,7 @@ class ZeroTrustQuarantineEngine:
             "sdn_action": f"FLOW_MOD: DROP src={sensor_id}"
         }
         self.isolation_log.append(record)
-        print(f"🔒 [Zero-Trust Quarantine] Isolated sensor '{sensor_id}' due to {reason}.")
+        logger.warning(f"🔒 [Zero-Trust Quarantine] Isolated sensor '{sensor_id}' due to {reason}.")
         return record
 
     def is_quarantined(self, sensor_id: str) -> bool:
@@ -30,6 +33,6 @@ class ZeroTrustQuarantineEngine:
     def release_sensor(self, sensor_id: str) -> bool:
         if sensor_id in self.quarantined_sensors:
             self.quarantined_sensors.remove(sensor_id)
-            print(f"🔓 [Zero-Trust Quarantine] Released sensor '{sensor_id}'.")
+            logger.info(f"🔓 [Zero-Trust Quarantine] Released sensor '{sensor_id}'.")
             return True
         return False

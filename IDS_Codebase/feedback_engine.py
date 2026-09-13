@@ -5,14 +5,28 @@ import numpy as np
 
 FEEDBACK_FILE = "feedbackmemory.json"
 
+_FEEDBACK_CACHE = {}
+_FEEDBACK_MTIME = {}
+
 def load_feedback(filepath=FEEDBACK_FILE):
     if not os.path.exists(filepath):
         return []
     try:
+        mtime = os.path.getmtime(filepath)
+        if filepath in _FEEDBACK_CACHE and _FEEDBACK_MTIME.get(filepath) == mtime:
+            return _FEEDBACK_CACHE[filepath]
         with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            _FEEDBACK_CACHE[filepath] = data
+            _FEEDBACK_MTIME[filepath] = mtime
+            return data
     except (json.JSONDecodeError, IOError):
         return []
+
+def clear_feedback_cache(filepath=FEEDBACK_FILE):
+    _FEEDBACK_CACHE.pop(filepath, None)
+    _FEEDBACK_MTIME.pop(filepath, None)
+
 
 def save_feedback(feedback_memory, filepath=FEEDBACK_FILE):
     """Atomic write operation to prevent JSON corruption during high-frequency stream updates."""

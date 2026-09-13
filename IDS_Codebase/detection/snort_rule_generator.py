@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import os
+import logging
 from typing import List, Dict, Any
+
+logger = logging.getLogger("SnortRuleGenerator")
 
 class SnortRuleGenerator:
     """
@@ -27,7 +30,7 @@ class SnortRuleGenerator:
             "snort_rule": snort_string
         }
         self.generated_rules.append(record)
-        print(f"🛡️ [Snort Rule Generated] SID {self.current_sid}: {snort_string}")
+        logger.info(f"🛡️ [Snort Rule Generated] SID {self.current_sid}: {snort_string}")
         return record
 
     def export_rules_file(self, filepath: str = "Snort_Rules/dynamic_generated.rules") -> str:
