@@ -269,9 +269,39 @@ class HybridIoTIDSTest(unittest.TestCase):
         self.assertTrue(rbac.has_permission(role, "isolate_sensors"))
         self.assertFalse(rbac.has_permission("facility_engineer", "isolate_sensors"))
 
+    def test_snort_rule_generator(self) -> None:
+        from detection.snort_rule_generator import SnortRuleGenerator
+        import tempfile
+        import os
+
+        generator = SnortRuleGenerator(start_sid=3000000)
+        rule = generator.generate_rule_from_attack("Injection Attack", "192.168.1.50", 1883)
+        self.assertEqual(rule["sid"], 3000001)
+        self.assertIn("alert tcp 192.168.1.50 any -> any 1883", rule["snort_rule"])
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "dynamic.rules")
+            generator.export_rules_file(filepath)
+            self.assertTrue(os.path.exists(filepath))
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("3000001", content)
+
+    def test_building_graph_topology(self) -> None:
+        from features.graph_topology import BuildingGraphTopology
+        topology = BuildingGraphTopology()
+        topology.add_zone_connection("Zone_A", "Zone_B")
+        topology.add_zone_connection("Zone_B", "Zone_C")
+
+        at_risk = topology.trace_attack_propagation("Zone_A", max_depth=2)
+        self.assertIn("Zone_B", at_risk)
+        self.assertIn("Zone_C", at_risk)
+        self.assertEqual(len(at_risk), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 
