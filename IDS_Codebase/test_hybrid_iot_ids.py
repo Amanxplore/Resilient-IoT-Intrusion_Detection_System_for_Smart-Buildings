@@ -169,6 +169,35 @@ class HybridIoTIDSTest(unittest.TestCase):
     def test_similarity_returns_zero_for_shape_mismatch(self) -> None:
         self.assertEqual(ids._window_similarity(np.ones((2, 2), dtype=np.float32), np.ones((3, 2), dtype=np.float32)), 0.0)
 
+    def test_feature_engineering_multimodal_columns(self) -> None:
+        frame = self._sample_frame()
+        featured = engineer_features(frame, consistency_window=3)
+        self.assertIn("temp_hum_ratio", featured.columns)
+        self.assertIn("temp_hum_corr", featured.columns)
+
+    def test_feedback_engine_atomic_save_and_load(self) -> None:
+        from feedback_engine import add_feedback, load_feedback, find_similar_feedback
+        import tempfile
+        import os
+
+        with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".json") as tmp:
+            tmp_path = tmp.name
+
+        try:
+            features = [1.0, 2.0, 3.0, 4.0]
+            add_feedback(features, "Injection Attack", filepath=tmp_path)
+            loaded = load_feedback(filepath=tmp_path)
+            self.assertEqual(len(loaded), 1)
+            self.assertEqual(loaded[0]["label"], "Injection Attack")
+
+            match = find_similar_feedback(features, loaded, threshold=0.9)
+            self.assertIsNotNone(match)
+            self.assertEqual(match[0], "Injection Attack")
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
 
 if __name__ == "__main__":
     unittest.main()
+

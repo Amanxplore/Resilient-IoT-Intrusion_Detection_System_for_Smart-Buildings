@@ -726,26 +726,38 @@ def classify_window(
         decision_source = "rule_engine"
 
     else:
-        if 'rf_raw' in locals() and rf_conf >= 0.5:
-            predicted_label = {
+        if 'rf_raw' in locals() and (rf_conf >= 0.45 or gb_conf >= 0.45):
+            # Tier 2 Voting Ensemble between Random Forest and Gradient Boosting
+            label_name_map = {
                 "normal": "Normal",
                 "drift_attack": "Drift Attack",
                 "noise_attack": "Noise Attack",
                 "injection_attack": "Injection Attack",
                 "drop_attack": "Drop Attack",
                 "replay_attack": "Replay Attack"
-            }.get(rf_raw, rf_raw)
-            decision_source = "ensemble_rf"
-            if rf_conf > 0.75:
-                confidence = "HIGH"
-            elif rf_conf > 0.5:
-                confidence = "MEDIUM"
+            }
+            if rf_raw == gb_raw:
+                ensemble_raw = rf_raw
+                conf_val = max(rf_conf, gb_conf)
+                conf_str = "HIGH" if conf_val > 0.7 else "MEDIUM"
+                source_str = "ensemble_voting_consensus"
+            elif rf_conf >= gb_conf:
+                ensemble_raw = rf_raw
+                conf_str = "MEDIUM" if rf_conf > 0.6 else "LOW"
+                source_str = "ensemble_rf"
             else:
-                confidence = "LOW"
+                ensemble_raw = gb_raw
+                conf_str = "MEDIUM" if gb_conf > 0.6 else "LOW"
+                source_str = "ensemble_gb"
+
+            predicted_label = label_name_map.get(ensemble_raw, ensemble_raw)
+            confidence = conf_str
+            decision_source = source_str
         else:
             predicted_label = "Normal"
             confidence = "LOW"
             decision_source = "default"
+
 
     # Only override Normal to Noise Attack if the signal actually displays elevated standard deviation/entropy
     if predicted_label == "Normal" and anomaly_flag:

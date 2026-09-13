@@ -42,6 +42,11 @@ def engineer_features(df: pd.DataFrame, consistency_window: int = 5) -> pd.DataF
             return -np.sum(probs * np.log(probs))
         g["temp_entropy"] = g["temperature_c"].rolling(window=10).apply(_calculate_entropy, raw=True).fillna(0.0)
         g["humidity_entropy"] = g["humidity_percent"].rolling(window=10).apply(_calculate_entropy, raw=True).fillna(0.0)
+        # Multi-modal interaction features
+        g["temp_hum_ratio"] = (g["temperature_c"] / (g["humidity_percent"] + 1e-5)).fillna(0.0)
+        g["temp_hum_corr"] = (
+            g["temperature_c"].rolling(window=10).corr(g["humidity_percent"]).fillna(0.0)
+        )
         g = g.bfill()
         g["source"] = source
         feature_frames.append(g)
@@ -49,3 +54,4 @@ def engineer_features(df: pd.DataFrame, consistency_window: int = 5) -> pd.DataF
     print("\nFeature Engineering Completed. Columns:")
     print(featured.columns)
     return featured
+

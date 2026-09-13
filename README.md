@@ -31,9 +31,11 @@ Our hybrid approach and next-gen roadmap are validated by three recent research 
 
 
 ## ⚡ Key Upgrades 
-*   **78.10% Overall Accuracy** on multi-sensor streams.
-*   **Interactive Web UI Dashboard** built with Streamlit and Plotly.
-*   **Human-in-the-Loop Feedback Engine** for continuous adaptive learning.
+*   **78.78% Overall Accuracy** on multi-sensor real-world & synthetic streams.
+*   **3-Tier Multi-Model Voting Ensemble** fusing PyTorch LSTM Autoencoder, Random Forest, Gradient Boosting, and Isolation Forest.
+*   **Interactive Web UI Dashboard** built with Streamlit, Plotly, and real-time playback controls.
+*   **Human-in-the-Loop Feedback Engine** with atomic storage persistence and exponential similarity decay.
+*   **Multi-Modal Sensor Fusion** features combining temperature-humidity interaction ratios and rolling cross-correlations.
 
 ---
 
