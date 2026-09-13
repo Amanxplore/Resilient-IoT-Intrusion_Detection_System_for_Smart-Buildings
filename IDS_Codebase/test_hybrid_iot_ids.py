@@ -246,8 +246,33 @@ class HybridIoTIDSTest(unittest.TestCase):
         self.assertIn("out of bounds", err_msg)
 
 
+    def test_honeypot_deception_engine(self) -> None:
+
+        from detection.honeypot_deception import HoneypotDeceptionEngine
+        honeypot = HoneypotDeceptionEngine()
+        event = honeypot.inspect_topic_access("sensor/Decoy_Node_99", "192.168.1.100", "probe", "2026-01-01T00:00:00")
+        self.assertIsNotNone(event)
+        self.assertEqual(event["attacker_ip"], "192.168.1.100")
+
+    def test_token_bucket_rate_limiter(self) -> None:
+        from detection.token_bucket_limiter import TokenBucketRateLimiter
+        limiter = TokenBucketRateLimiter(capacity=2.0, fill_rate=0.0)
+        self.assertTrue(limiter.allow_request("Device_01", current_time=1.0))
+        self.assertTrue(limiter.allow_request("Device_01", current_time=1.0))
+        self.assertFalse(limiter.allow_request("Device_01", current_time=1.0))
+
+    def test_rbac_auth_manager(self) -> None:
+        from auth_rbac import RBACAuthManager
+        rbac = RBACAuthManager()
+        role = rbac.authenticate("admin", "admin123")
+        self.assertEqual(role, "admin")
+        self.assertTrue(rbac.has_permission(role, "isolate_sensors"))
+        self.assertFalse(rbac.has_permission("facility_engineer", "isolate_sensors"))
+
+
 if __name__ == "__main__":
     unittest.main()
+
 
 
 
