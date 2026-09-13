@@ -224,7 +224,30 @@ class HybridIoTIDSTest(unittest.TestCase):
         self.assertFalse(quarantine.is_quarantined("Device_01"))
 
 
+    def test_diurnal_baseline_scaler(self) -> None:
+        from features.diurnal_baseline import DiurnalBaselineScaler
+        scaler = DiurnalBaselineScaler(base_temp=22.0, amplitude=4.0)
+        ts_peak = pd.Timestamp("2026-01-01 14:00:00")
+        expected_peak = scaler.compute_expected_ambient(ts_peak)
+        self.assertAlmostEqual(expected_peak, 26.0, delta=0.5)
+
+    def test_active_learning_pipeline(self) -> None:
+        from active_learning_pipeline import ActiveLearningPipeline
+        pipeline = ActiveLearningPipeline(retrain_threshold=5, feedback_file="nonexistent.json")
+        self.assertFalse(pipeline.check_retrain_needed())
+
+    def test_bacnet_dpi_parser(self) -> None:
+        from detection.bacnet_dpi import BACnetDPIParser
+        parser = BACnetDPIParser()
+        valid, msg = parser.validate_setpoint(22.5)
+        self.assertTrue(valid)
+        invalid, err_msg = parser.validate_setpoint(45.0)
+        self.assertFalse(invalid)
+        self.assertIn("out of bounds", err_msg)
+
+
 if __name__ == "__main__":
     unittest.main()
+
 
 
